@@ -1,18 +1,23 @@
 package org.syemon;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedWriter;
 import java.util.List;
 
+@Slf4j
 public class ResponseWriter {
+
+    private static final String HTTP_1_1 = "HTTP/1.1";
 
     public void writeResponse(HttpResponse httpResponse, BufferedWriter outputStream) {
         String responseId = httpResponse.getBody().toString();
-        System.out.println("Response ID: " + responseId);
+        log.debug("Response ID: {}", responseId);
 
         List<String> headers = httpResponse.getHeaders();
-        System.out.println(responseId + " Headers: " + headers);
+        log.debug("{} Headers: {}", responseId, headers);
         try {
-            outputStream.write("HTTP/1.1 " + httpResponse.getStatusCode() + "\r\n");
+            outputStream.write(HTTP_1_1 + " " + httpResponse.getStatusCode() + "\r\n");
             for (String header : headers) {
                 outputStream.write(header + "\r\n");
             }
@@ -20,8 +25,7 @@ public class ResponseWriter {
             outputStream.write(httpResponse.getBody().toString());
             outputStream.close();
         } catch (Exception e) {
-            System.out.println(responseId + " Error while writing response: " + e.getMessage());
-            e.printStackTrace();
+            log.error("{} Error while writing response: {}", responseId, e.getMessage());
         }
     }
 }

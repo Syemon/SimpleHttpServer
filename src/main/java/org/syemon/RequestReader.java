@@ -1,5 +1,7 @@
 package org.syemon;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -10,7 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+@Slf4j
 public class RequestReader {
+
+    public static final String HTTP_1_1 = "HTTP/1.1";
 
     public Optional<HttpRequest> decode(final InputStream inputStream) {
         List<String> lines = inputStreamToRequestLines(inputStream);
@@ -45,18 +50,20 @@ public class RequestReader {
 
     private static Optional<HttpRequest> buildRequest(List<String> message) {
         if (message.isEmpty()) {
+            log.warn("Received empty request");
             return Optional.empty();
         }
 
-        String firstLine = message.get(0);
+        String firstLine = message.getFirst();
         String[] httpInfo = firstLine.split(" ");
 
         if (httpInfo.length != 3) {
+            log.warn("Invalid request: {}. Did not receive all http info (httpMethod, path)", firstLine);
             return Optional.empty();
         }
 
         String protocolVersion = httpInfo[2];
-        if (!protocolVersion.equals("HTTP/1.1")) {
+        if (!protocolVersion.equals(HTTP_1_1)) {
             return Optional.empty();
         }
 
@@ -67,6 +74,7 @@ public class RequestReader {
                             .path(new URI(httpInfo[1]).getPath())
                             .build());
         } catch (URISyntaxException | IllegalArgumentException e) {
+            log.error("Error while building request: {}", e.getMessage(), e);
             return Optional.empty();
         }
     }

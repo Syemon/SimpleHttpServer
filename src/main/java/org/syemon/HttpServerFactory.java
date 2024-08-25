@@ -10,8 +10,6 @@ import java.util.concurrent.Executors;
 
 public class HttpServerFactory {
 
-    public static final int BACKLOG = 0;
-
     public SimpleHttpServer create(HttpServerConfig httpServerConfig) throws IOException {
         Optional.ofNullable(httpServerConfig.getPort())
                 .orElseThrow(() -> new IllegalArgumentException("Port is required"));

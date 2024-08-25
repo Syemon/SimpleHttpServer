@@ -1,6 +1,7 @@
 package org.syemon;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 
+@Slf4j
 @AllArgsConstructor
 public class SimpleHttpServer {
     private final ServerSocket serverSocket;
@@ -19,23 +21,22 @@ public class SimpleHttpServer {
     public void start() {
         OffsetDateTime serverStartTime = OffsetDateTime.now();
 
-        System.out.println("Server start at: " + serverStartTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        log.info("Server start at: {}", serverStartTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         try {
             while (true) {
-
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Server accepted connection" + clientSocket);
+                log.info("Server accepted connection {}", clientSocket);
                 Runnable runner = () -> httpProcessor.process(clientSocket);
                 executorService.execute(runner);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while running the server: {}", e.getMessage(), e);
         } finally {
             executorService.shutdown();
             stop();
             OffsetDateTime serverEndTime = OffsetDateTime.now();
             long durationInMillis = Duration.between(serverStartTime, serverEndTime).toMillis();
-            System.out.printf("Server shutdown at: %s. It lasted %d milliseconds", serverEndTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), durationInMillis);
+            log.info("Server shutdown at: {}. It lasted {} milliseconds", serverEndTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), durationInMillis);
         }
 
     }
