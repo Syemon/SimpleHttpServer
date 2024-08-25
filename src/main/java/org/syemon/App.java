@@ -61,7 +61,8 @@ public class App
                 .setPort(8080)
                 .setThreadPoolSize(10);
         HttpServerFactory httpServerFactory = new HttpServerFactory();
-        SimpleHttpServer simpleHttpServer = new SimpleHttpServer(httpServerFactory.create(httpServerConfig));
+
+        SimpleHttpServer simpleHttpServer = httpServerFactory.create(httpServerConfig);
         simpleHttpServer.start();
     }
 }

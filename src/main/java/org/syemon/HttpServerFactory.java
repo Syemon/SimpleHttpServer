@@ -1,18 +1,18 @@
 package org.syemon;
 
-import com.sun.net.httpserver.HttpServer;
-
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class HttpServerFactory {
 
     public static final int BACKLOG = 0;
 
-    public HttpServer create(HttpServerConfig httpServerConfig) throws IOException {
+    public SimpleHttpServer create(HttpServerConfig httpServerConfig) throws IOException {
         Optional.ofNullable(httpServerConfig.getPort())
                 .orElseThrow(() -> new IllegalArgumentException("Port is required"));
         Optional.ofNullable(httpServerConfig.getHost())
@@ -20,16 +20,20 @@ public class HttpServerFactory {
         Optional.ofNullable(httpServerConfig.getThreadPoolSize())
                 .orElseThrow(() -> new IllegalArgumentException("ThreadPoolSize is required"));
 
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(
-                httpServerConfig.getHost(),
-                httpServerConfig.getPort());
+        ServerSocket serverSocket = new ServerSocket(httpServerConfig.getPort());
+        final RequestReader requestReader = new RequestReader();
+        final ResponseWriter responseWriter = new ResponseWriter();
+        SimpleHttpServer simpleHttpServer = new SimpleHttpServer(serverSocket, Executors.newFixedThreadPool(httpServerConfig.getThreadPoolSize()), new HttpProcessor(requestReader, responseWriter, new ConcurrentHashMap<>()));
 
-        HttpServer httpServer = HttpServer.create(inetSocketAddress, BACKLOG);
+        simpleHttpServer.addRoute(
+                "/multi",
+                "GET",
+                request ->
+                        HttpResponse.builder()
+                                .statusCode(200)
+                                .headers(List.of("Content-Type: text/plain"))
+                                .body(UUID.randomUUID().toString()).build());
 
-        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
-        httpServer.setExecutor(threadPoolExecutor);
-
-        httpServer.createContext("/multi", new ConcurrentCollectionHttpHandler());
-        return httpServer;
+        return simpleHttpServer;
     }
 }
