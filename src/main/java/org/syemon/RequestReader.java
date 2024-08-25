@@ -20,13 +20,9 @@ public class RequestReader {
     private static List<String> inputStreamToRequestLines(InputStream inputStream) {
         try {
             int availableBytes = inputStream.available();
-            System.out.println("Available bytes: " + availableBytes);
-
-            if (!(inputStream.available() > 0)) {
-                System.out.println("No data in input stream");
-                return Collections.emptyList();
+            while (availableBytes <= 0) {//TODO: add some timeout?
+                availableBytes = inputStream.available();
             }
-
 
             final char[] inBuffer = new char[inputStream.available()];
             final InputStreamReader inReader = new InputStreamReader(inputStream);

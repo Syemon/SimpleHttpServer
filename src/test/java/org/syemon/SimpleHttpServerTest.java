@@ -13,6 +13,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,16 +38,11 @@ public class SimpleHttpServerTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-
-
-//        ConcurrentCollectionHttpHandler.CONCURRENT_MAP.clear();
-
         HttpServerConfig httpServerConfig = new HttpServerConfig()
                 .setHost(HOST)
                 .setPort(PORT)
                 .setThreadPoolSize(THREAD_POOL_SIZE);
         simpleHttpServer = httpServerFactory.create(httpServerConfig);
-        //invoke simpleHttpServer.start() in a separate thread, but not in executor
         new Thread(simpleHttpServer::start).start();
 
         client = HttpClient.newHttpClient();
@@ -65,7 +62,7 @@ public class SimpleHttpServerTest {
 
     @RepeatedTest(10)
     public void testParallelRequests() throws InterruptedException {
-//        assertThat(ConcurrentCollectionHttpHandler.CONCURRENT_MAP).isEmpty();
+        Set<String> responses = new ConcurrentSkipListSet<>();
 
         final int numberOfRequests = 1000;
         final int threadPoolNumber = 20;
@@ -80,6 +77,7 @@ public class SimpleHttpServerTest {
                                 request, HttpResponse.BodyHandlers.ofString());
 
                         assertThat(response.statusCode()).isEqualTo(HttpURLConnection.HTTP_OK);
+                        responses.add(response.body());
                     } catch (Exception e) {
                         log.error("Request failed", e);
                         assert false : "Request failed";
@@ -97,6 +95,6 @@ public class SimpleHttpServerTest {
             }
         }
 
-//        assertThat(ConcurrentCollectionHttpHandler.CONCURRENT_MAP.size()).isEqualTo(numberOfRequests);
+        assertThat(responses).hasSize(numberOfRequests);
     }
 }
