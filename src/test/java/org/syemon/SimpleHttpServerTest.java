@@ -27,7 +27,7 @@ public class SimpleHttpServerTest {
     public static final String HOST = "localhost";
     public static final int PORT = 8080;
     public static final int THREAD_POOL_SIZE = 10;
-    private static final String URL = "http://%s:%s/multi".formatted(HOST, PORT);
+    private static final String URL = "http://%s:%s/test".formatted(HOST, PORT);
 
     private final HttpServerFactory httpServerFactory = new HttpServerFactory();
 
@@ -38,10 +38,11 @@ public class SimpleHttpServerTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        HttpServerConfig httpServerConfig = new HttpServerConfig()
-                .setHost(HOST)
-                .setPort(PORT)
-                .setThreadPoolSize(THREAD_POOL_SIZE);
+        HttpServerConfig httpServerConfig = HttpServerConfig.builder()
+                .host(HOST)
+                .port(PORT)
+                .threadPoolSize(THREAD_POOL_SIZE)
+                .build();
         simpleHttpServer = httpServerFactory.create(httpServerConfig);
         new Thread(simpleHttpServer::start).start();
 

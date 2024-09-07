@@ -24,7 +24,7 @@ public class HttpServerFactory {
         SimpleHttpServer simpleHttpServer = new SimpleHttpServer(serverSocket, Executors.newFixedThreadPool(httpServerConfig.getThreadPoolSize()), new HttpProcessor(requestReader, responseWriter, new ConcurrentHashMap<>()));
 
         simpleHttpServer.addRoute(
-                "/multi",
+                "/test",
                 "GET",
                 request ->
                         HttpResponse.builder()

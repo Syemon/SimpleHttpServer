@@ -1,10 +1,12 @@
 package org.syemon;
 
-import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
-@Accessors(chain = true)
+@Builder
+@Getter
+@ToString
 public class HttpServerConfig {
     private String host;
     private Integer port;

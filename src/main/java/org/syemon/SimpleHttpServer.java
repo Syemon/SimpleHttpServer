@@ -51,7 +51,7 @@ public class SimpleHttpServer {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            System.out.println("Error while stopping the server: " + e.getMessage());
+            log.error("Error while stopping the server", e);
         }
     }
 }
